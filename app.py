@@ -22,13 +22,16 @@ st.set_page_config(
 )
 
 # =========================================================
-# 2. CUSTOM CSS
+# 2. CUSTOM CSS  —  FIXED for visible input text
 # =========================================================
 st.markdown("""
 <style>
+    /* ---------- Main area background ---------- */
     .main {
         background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
     }
+
+    /* ---------- Title ---------- */
     .big-title {
         font-size: 3rem;
         font-weight: 800;
@@ -45,6 +48,8 @@ st.markdown("""
         margin-top: -10px;
         margin-bottom: 25px;
     }
+
+    /* ---------- Result cards ---------- */
     .result-card {
         padding: 25px;
         border-radius: 15px;
@@ -55,21 +60,121 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         margin-top: 15px;
     }
-    .survived   { background: linear-gradient(135deg, #11998e, #38ef7d); }
+    .survived     { background: linear-gradient(135deg, #11998e, #38ef7d); }
     .not-survived { background: linear-gradient(135deg, #eb3349, #f45c43); }
+
+    /* ---------- Metric values ---------- */
     div[data-testid="stMetricValue"] {
         font-size: 1.8rem;
         color: #1e3c72;
     }
+
+    /* ============================================================
+       SIDEBAR — dark blue gradient background
+       ============================================================ */
     section[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #1e3c72, #2a5298);
     }
-    section[data-testid="stSidebar"] * {
+
+    /* Sidebar labels, headers, markdown text — WHITE */
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] h4,
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] .stMarkdown * {
         color: white !important;
     }
+
+    /* Widget labels (text above inputs) — WHITE */
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] label p,
+    section[data-testid="stSidebar"] label span {
+        color: white !important;
+    }
+
+    /* Radio option text — WHITE */
+    section[data-testid="stSidebar"] div[role="radiogroup"] label,
+    section[data-testid="stSidebar"] div[role="radiogroup"] label * {
+        color: white !important;
+    }
+
+    /* ============================================================
+       INPUT WIDGETS — WHITE background + DARK BLUE text
+       (FIXES invisible text on selectbox / number input)
+       ============================================================ */
+
+    /* --- Selectbox outer container --- */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
+        background-color: #ffffff !important;
+        border: 1px solid #2a5298 !important;
+        color: #1e3c72 !important;
+    }
+    /* --- Selectbox text inside --- */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] span,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] div,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] input {
+        color: #1e3c72 !important;
+        background-color: transparent !important;
+    }
+
+    /* --- Text / number inputs --- */
+    section[data-testid="stSidebar"] input,
+    section[data-testid="stSidebar"] textarea {
+        background-color: #ffffff !important;
+        color: #1e3c72 !important;
+        border: 1px solid #2a5298 !important;
+    }
+
+    /* --- Number input wrapper + buttons --- */
+    section[data-testid="stSidebar"] div[data-testid="stNumberInput"] > div {
+        background-color: #ffffff !important;
+        border-radius: 6px;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button {
+        background-color: #e0eafc !important;
+        color: #1e3c72 !important;
+        border: none !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button svg {
+        fill: #1e3c72 !important;
+    }
+
+    /* --- Slider value text --- */
+    section[data-testid="stSidebar"] div[data-testid="stSlider"] div {
+        color: #ffffff !important;
+    }
+    section[data-testid="stSidebar"] div[data-testid="stSlider"] [data-testid="stTickBar"] {
+        color: #ffffff !important;
+    }
+
+    /* --- Checkbox text --- */
+    section[data-testid="stSidebar"] div[data-testid="stCheckbox"] label,
+    section[data-testid="stSidebar"] div[data-testid="stCheckbox"] label * {
+        color: white !important;
+    }
+
+    /* ============================================================
+       DROPDOWN MENU (opens on click) — white bg + dark text
+       ============================================================ */
+    div[data-baseweb="popover"] ul,
+    div[data-baseweb="popover"] li,
+    div[data-baseweb="popover"] div[role="option"] {
+        background-color: #ffffff !important;
+        color: #1e3c72 !important;
+    }
+    div[data-baseweb="popover"] li:hover,
+    div[data-baseweb="popover"] div[role="option"]:hover {
+        background-color: #e0eafc !important;
+        color: #1e3c72 !important;
+    }
+
+    /* ============================================================
+       BUTTONS
+       ============================================================ */
     .stButton>button {
         background: linear-gradient(90deg, #1e3c72, #2a5298);
-        color: white;
+        color: white !important;
         font-weight: bold;
         border-radius: 10px;
         padding: 10px 30px;
@@ -80,6 +185,10 @@ st.markdown("""
     .stButton>button:hover {
         background: linear-gradient(90deg, #2a5298, #1e3c72);
         transform: scale(1.02);
+        color: white !important;
+    }
+    .stButton>button:focus {
+        color: white !important;
     }
 </style>
 """, unsafe_allow_html=True)
