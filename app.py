@@ -1,5 +1,5 @@
 # =========================================================
-# 🚢 TITANIC SURVIVAL PREDICTION — STREAMLIT APP (FIXED)
+# 🚢 TITANIC SURVIVAL PREDICTION — STREAMLIT APP (FINAL)
 # =========================================================
 
 import os
@@ -22,7 +22,7 @@ st.set_page_config(
 )
 
 # =========================================================
-# 2. CUSTOM CSS  —  FIXED for visible input text
+# 2. CUSTOM CSS — WHITE inputs + BLACK text
 # =========================================================
 st.markdown("""
 <style>
@@ -38,7 +38,7 @@ st.markdown("""
         text-align: center;
         background: linear-gradient(90deg, #1e3c72, #2a5298);
         -webkit-background-clip: text;
-        -webkit-text-fill-color: white;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 0;
     }
     .subtitle {
@@ -100,21 +100,22 @@ st.markdown("""
     }
 
     /* ============================================================
-       INPUT WIDGETS — WHITE background + DARK BLUE text
-       (FIXES invisible text on selectbox / number input)
+       INPUT WIDGETS — WHITE background + BLACK text
        ============================================================ */
 
-    /* --- Selectbox outer container --- */
+    /* --- Selectbox displayed box --- */
     section[data-testid="stSidebar"] div[data-baseweb="select"] > div {
         background-color: #ffffff !important;
-        border: 1px solid #2a5298 !important;
-        color: #1e3c72 !important;
+        border: 1px solid #000000 !important;
+        color: #000000 !important;
     }
     /* --- Selectbox text inside --- */
     section[data-testid="stSidebar"] div[data-baseweb="select"] span,
     section[data-testid="stSidebar"] div[data-baseweb="select"] div,
-    section[data-testid="stSidebar"] div[data-baseweb="select"] input {
-        color: #1e3c72 !important;
+    section[data-testid="stSidebar"] div[data-baseweb="select"] input,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+        color: #000000 !important;
+        fill: #000000 !important;
         background-color: transparent !important;
     }
 
@@ -122,22 +123,23 @@ st.markdown("""
     section[data-testid="stSidebar"] input,
     section[data-testid="stSidebar"] textarea {
         background-color: #ffffff !important;
-        color: #1e3c72 !important;
-        border: 1px solid #2a5298 !important;
+        color: #000000 !important;
+        border: 1px solid #000000 !important;
     }
 
     /* --- Number input wrapper + buttons --- */
     section[data-testid="stSidebar"] div[data-testid="stNumberInput"] > div {
         background-color: #ffffff !important;
+        border: 1px solid #000000 !important;
         border-radius: 6px;
     }
     section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button {
-        background-color: #e0eafc !important;
-        color: #1e3c72 !important;
+        background-color: #f0f0f0 !important;
+        color: #000000 !important;
         border: none !important;
     }
     section[data-testid="stSidebar"] div[data-testid="stNumberInput"] button svg {
-        fill: #1e3c72 !important;
+        fill: #000000 !important;
     }
 
     /* --- Slider value text --- */
@@ -155,18 +157,22 @@ st.markdown("""
     }
 
     /* ============================================================
-       DROPDOWN MENU (opens on click) — white bg + dark text
+       DROPDOWN MENU (opens on click) — WHITE bg + BLACK text
        ============================================================ */
     div[data-baseweb="popover"] ul,
     div[data-baseweb="popover"] li,
     div[data-baseweb="popover"] div[role="option"] {
         background-color: #ffffff !important;
-        color: #1e3c72 !important;
+        color: #000000 !important;
+    }
+    div[data-baseweb="popover"] li span,
+    div[data-baseweb="popover"] div[role="option"] span {
+        color: #000000 !important;
     }
     div[data-baseweb="popover"] li:hover,
     div[data-baseweb="popover"] div[role="option"]:hover {
-        background-color: #e0eafc !important;
-        color: #1e3c72 !important;
+        background-color: #f0f0f0 !important;
+        color: #000000 !important;
     }
 
     /* ============================================================
