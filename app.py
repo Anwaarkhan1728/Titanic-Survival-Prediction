@@ -1,7 +1,5 @@
 # =========================================================
-# 🚢 TITANIC SURVIVAL PREDICTION — STREAMLIT APP
-# Author  : CASMI26
-# Purpose : Predict survival of Titanic passengers using ML
+# 🚢 TITANIC SURVIVAL PREDICTION — STREAMLIT APP (FIXED)
 # =========================================================
 
 import os
@@ -11,6 +9,7 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
+import sklearn
 
 # =========================================================
 # 1. PAGE CONFIG
@@ -23,15 +22,13 @@ st.set_page_config(
 )
 
 # =========================================================
-# 2. CUSTOM CSS — Beautiful UI
+# 2. CUSTOM CSS
 # =========================================================
 st.markdown("""
 <style>
-    /* Main background */
     .main {
         background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
     }
-    /* Title */
     .big-title {
         font-size: 3rem;
         font-weight: 800;
@@ -48,7 +45,6 @@ st.markdown("""
         margin-top: -10px;
         margin-bottom: 25px;
     }
-    /* Result cards */
     .result-card {
         padding: 25px;
         border-radius: 15px;
@@ -61,12 +57,10 @@ st.markdown("""
     }
     .survived   { background: linear-gradient(135deg, #11998e, #38ef7d); }
     .not-survived { background: linear-gradient(135deg, #eb3349, #f45c43); }
-    /* Metric boxes */
     div[data-testid="stMetricValue"] {
         font-size: 1.8rem;
         color: #1e3c72;
     }
-    /* Sidebar */
     section[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #1e3c72, #2a5298);
     }
@@ -91,13 +85,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 3. FEATURE ENGINEERING (must match training EXACTLY)
+# 3. FEATURE ENGINEERING
 # =========================================================
 def engineer_features(data: pd.DataFrame) -> pd.DataFrame:
-    """Apply the same feature engineering used during training."""
     data = data.copy()
 
-    # --- Title extraction from Name ---
     if "Name" in data.columns:
         data["Title"] = data["Name"].str.extract(r" ([A-Za-z]+)\.", expand=False)
     else:
@@ -110,20 +102,16 @@ def engineer_features(data: pd.DataFrame) -> pd.DataFrame:
     data["Title"] = data["Title"].replace("Mme", "Mrs")
     data["Title"] = data["Title"].fillna("Mr")
 
-    # --- Family features ---
     data["FamilySize"] = data["SibSp"] + data["Parch"] + 1
     data["IsAlone"]    = (data["FamilySize"] == 1).astype(int)
 
-    # --- Cabin flag ---
     if "Cabin" in data.columns:
         data["HasCabin"] = data["Cabin"].notna().astype(int)
     else:
         data["HasCabin"] = 0
 
-    # --- Fare per person ---
     data["FarePerPerson"] = data["Fare"] / data["FamilySize"]
 
-    # --- Age imputation by Title ---
     if data["Age"].isna().any():
         medians = {"Mr": 30, "Miss": 22, "Mrs": 35,
                    "Master": 5, "Rare": 45}
@@ -132,43 +120,65 @@ def engineer_features(data: pd.DataFrame) -> pd.DataFrame:
             axis=1
         )
 
-    # --- Fare / Embarked fallbacks ---
     data["Fare"]     = data["Fare"].fillna(32.0)
     data["Embarked"] = data["Embarked"].fillna("S")
 
     return data
 
-
 # =========================================================
-# 4. LOAD MODEL
+# 4. LOAD MODEL — ROBUST VERSION
 # =========================================================
 MODEL_PATH = "titanic_best_model.pkl"
+EXPECTED_SKLEARN = "1.6.1"
 
 @st.cache_resource(show_spinner=False)
 def load_model(path: str):
     if not os.path.exists(path):
-        return None
-    with open(path, "rb") as f:
-        return pickle.load(f)
+        return None, f"❌ Model file `{path}` not found in repo."
 
-model = load_model(MODEL_PATH)
+    current = sklearn.__version__
+    if current != EXPECTED_SKLEARN:
+        return None, (
+            f"⚠️ **scikit-learn version mismatch!**\n\n"
+            f"- Model trained with: `scikit-learn=={EXPECTED_SKLEARN}`\n"
+            f"- Current environment: `scikit-learn=={current}`\n\n"
+            f"**Fix:** Update `requirements.txt` to add `scikit-learn=={EXPECTED_SKLEARN}` and redeploy."
+        )
+
+    try:
+        with open(path, "rb") as f:
+            model = pickle.load(f)
+        return model, None
+    except AttributeError as e:
+        return None, (
+            f"❌ **Pickle load failed (AttributeError):** {e}\n\n"
+            f"Version mismatch. Expected `{EXPECTED_SKLEARN}`, got `{current}`."
+        )
+    except Exception as e:
+        return None, f"❌ **Failed to load model:** {type(e).__name__}: {e}"
+
+
+model, load_error = load_model(MODEL_PATH)
 
 # =========================================================
 # 5. HEADER
 # =========================================================
 st.markdown('<h1 class="big-title">🚢 Titanic Survival Predictor</h1>',
             unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Enter passenger details below and the machine learning model '
+st.markdown('<p class="subtitle">Enter passenger details below and the ML model '
             'will predict whether they would have survived the Titanic disaster.</p>',
             unsafe_allow_html=True)
 
 if model is None:
-    st.error("⚠️ Model file `titanic_best_model.pkl` not found. "
-             "Please run the training notebook first and place the .pkl file "
-             "in the same folder as `app.py`.")
+    st.error(load_error)
+    st.info(
+        "📌 **Tip:** Ensure your `requirements.txt` contains:\n"
+        "```\nscikit-learn==1.6.1\n```\n"
+        "Then push to GitHub — Streamlit Cloud will auto-rebuild."
+    )
     st.stop()
 
-st.success("✅ Model loaded successfully!")
+st.success(f"✅ Model loaded successfully! (scikit-learn {sklearn.__version__})")
 
 # =========================================================
 # 6. SIDEBAR INPUTS
@@ -200,7 +210,7 @@ with st.sidebar:
     predict_btn = st.button("🔮 Predict Survival")
 
 # =========================================================
-# 7. MAIN AREA — Preview & Prediction
+# 7. MAIN AREA
 # =========================================================
 col_left, col_right = st.columns([1, 1])
 
@@ -242,7 +252,6 @@ if predict_btn:
         st.error(f"Prediction failed: {e}")
         st.stop()
 
-    # ---- Result card ----
     with col_right:
         st.markdown("### 🎯 Prediction Result")
 
@@ -251,19 +260,16 @@ if predict_btn:
                 f'<div class="result-card survived">'
                 f'✅ SURVIVED<br>'
                 f'<span style="font-size:1.1rem">Confidence: {prob_survived*100:.2f}%</span>'
-                f'</div>',
-                unsafe_allow_html=True
+                f'</div>', unsafe_allow_html=True
             )
         else:
             st.markdown(
                 f'<div class="result-card not-survived">'
                 f'❌ DID NOT SURVIVE<br>'
                 f'<span style="font-size:1.1rem">Confidence: {prob_died*100:.2f}%</span>'
-                f'</div>',
-                unsafe_allow_html=True
+                f'</div>', unsafe_allow_html=True
             )
 
-        # ---- Probability bars ----
         st.markdown("#### 📊 Probabilities")
         st.metric("Survival Probability", f"{prob_survived*100:.2f}%")
         st.progress(prob_survived)
@@ -271,15 +277,12 @@ if predict_btn:
         st.metric("Death Probability", f"{prob_died*100:.2f}%")
         st.progress(prob_died)
 
-    # ---- Engineered features expander ----
     with st.expander("🔍 View Engineered Features Used by Model"):
         st.dataframe(row_fe.T.rename(columns={0: "Value"}),
                      use_container_width=True)
 
-    # ---- Gauge chart ----
     st.markdown("### 📈 Survival Probability Gauge")
     fig, ax = plt.subplots(figsize=(6, 3))
-    colors = ["#eb3349", "#f9d423", "#38ef7d"]
     ax.barh([""], [prob_survived], color="#38ef7d", edgecolor="black")
     ax.barh([""], [1 - prob_survived], left=[prob_survived],
             color="#eb3349", edgecolor="black")
@@ -307,8 +310,7 @@ st.divider()
 st.markdown(
     "<div style='text-align:center; color:#666; padding:10px;'>"
     "🚢 <b>Titanic Survival Predictor</b> • Built with Streamlit + scikit-learn • "
-    "Model: Auto-selected best of 3 classifiers (Logistic Regression, "
-    "Random Forest, Gradient Boosting)"
+    "Model: Logistic Regression (best of 3 classifiers)"
     "</div>",
     unsafe_allow_html=True
 )
