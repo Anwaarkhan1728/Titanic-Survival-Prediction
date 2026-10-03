@@ -38,7 +38,7 @@ st.markdown("""
         text-align: center;
         background: linear-gradient(90deg, #1e3c72, #2a5298);
         -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        -webkit-text-fill-color: white;
         margin-bottom: 0;
     }
     .subtitle {
